@@ -627,13 +627,14 @@ namespace test_dso
         private void SetCurrentWidowSize(int value = 10)
         {
             int curRecLength = Convert.ToInt16(((DSO.Interfaces.IParameter<DSO.Config.RecordLength>)cbxRecLength.SelectedItem).ParameterValue);
-            if ((value <= Convert.ToInt16(curRecLength / 10) && value >= 5))
+            int pointPerDiv = scope.DataSamplesPerDiv.GetParameter;
+            if ((value <= Convert.ToInt16(curRecLength / pointPerDiv) && value >= 5))
             {
                 gridCount = value;
             }
-            else if (value > Convert.ToInt16(curRecLength / 10))
+            else if (value > Convert.ToInt16(curRecLength / pointPerDiv))
             {
-                gridCount = Convert.ToInt16(curRecLength / 10);
+                gridCount = Convert.ToInt16(curRecLength / pointPerDiv);
             }
             else
             {
