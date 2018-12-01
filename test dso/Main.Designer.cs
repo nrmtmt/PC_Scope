@@ -403,7 +403,7 @@
             // 
             this.lbltrig.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.lbltrig.AutoSize = true;
-            this.lbltrig.Location = new System.Drawing.Point(885, 429);
+            this.lbltrig.Location = new System.Drawing.Point(874, 429);
             this.lbltrig.Name = "lbltrig";
             this.lbltrig.Size = new System.Drawing.Size(13, 17);
             this.lbltrig.TabIndex = 16;
@@ -434,7 +434,6 @@
             this.tbTrigg.TabIndex = 21;
             this.tbTrigg.TickStyle = System.Windows.Forms.TickStyle.TopLeft;
             this.tbTrigg.Scroll += new System.EventHandler(this.tbTrigg_Scroll);
-            this.tbTrigg.ValueChanged += new System.EventHandler(this.tbTrigg_ValueChanged);
             this.tbTrigg.MouseLeave += new System.EventHandler(this.tbTrigg_MouseLeave);
             // 
             // label2

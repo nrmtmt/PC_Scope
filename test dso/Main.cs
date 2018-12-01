@@ -18,7 +18,7 @@ namespace test_dso
     public partial class Main : Form
     {
         static Assembly assembly = Assembly.LoadFrom("DSO.dll");
-        public string version = "1.18.11.18 - GIT";
+        public string version = "1.18.12.01 - GIT";
         static Version ver = assembly.GetName().Version;
         public string DLLversion = ver.ToString();
         public static DSO.JyeScope scope;
@@ -38,11 +38,27 @@ namespace test_dso
         bool ScopeCaptureStopped = false; //to stop updatng Queue and allow to manipulate data set
         bool CursorMeasurements = false;
 
-        Series d1 = new Series(); //data line
-        Series t1 = new Series(); //trigger line
+        Series d1 = new Series()
+        {
+            Color = Color.Blue,
+            BorderWidth = 1
+        };//data line
+        Series t1 = new Series()
+        {
+            Color = Color.Green,
+            BorderWidth = 1
+        };//trigger line
 
-        Series r1 = new Series(); //right cursor
-        Series l1 = new Series(); //left cursor
+        Series r1 = new Series()
+        {
+            Color = Color.Red,
+            BorderWidth = 2
+        };//right cursor
+        Series l1 = new Series()
+        {
+            Color = Color.Orange,
+            BorderWidth = 2
+        };//left cursor
 
         ToolTip tooltip = new ToolTip(); 
         DebugWindow window = new DebugWindow();
@@ -51,15 +67,13 @@ namespace test_dso
         {
             InitializeComponent();
             SerialConfig.Instance.SerialPortCreated += Instance_SerialPortCreated;
-            chrt1.Series.Add(d1); d1.Color = Color.Blue;
-            chrt1.Series.Add(t1); t1.Color = Color.Green;
-            chrt1.Series.Add(l1); l1.Color = Color.Red;
-            chrt1.Series.Add(r1); r1.Color = Color.Violet;
-
-            tbTrigg.TickFrequency = 1000;
+            chrt1.Series.Add(d1);
+            chrt1.Series.Add(t1);
+            chrt1.Series.Add(l1);
+            chrt1.Series.Add(r1);
             this.chrt1.GetToolTipText += this.chrt1_GetToolTipText;
-            tooltip.AutoPopDelay = 1000;
-            tooltip.InitialDelay = 100;
+            tooltip.AutoPopDelay = 10000;
+            tooltip.InitialDelay = 10000;
             tooltip.ReshowDelay = 50;
             // Force the ToolTip text to be displayed whether or not the form is active.
             tooltip.ShowAlways = true;
@@ -99,7 +113,7 @@ namespace test_dso
                         lblScopeType.Text = scope.ScopeName;
                         PopulateConfig();
                         DisplayCurrentParameters();
-                        SetCurrentWidowSize(10);
+                        SetCurrentWindowSize(10);
                         scope.StartCapture();
                         EnableControls();
                         scope.NewDataInBuffer += Scope_NewDataInBuffer;
@@ -209,7 +223,7 @@ namespace test_dso
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show($"PC Scope  v. {version}" + System.Environment.NewLine + $"DSO.dll version v. {DLLversion}" + System.Environment.NewLine + "(C) Kamil Karlowicz 2018", "About", MessageBoxButtons.OK, MessageBoxIcon.Question);
+            MessageBox.Show($"PC Scope  v. {version}" + System.Environment.NewLine + $"DSO.dll  v. {DLLversion}" + System.Environment.NewLine + "(C) Kamil Karlowicz 2018", "About", MessageBoxButtons.OK, MessageBoxIcon.Question);
         }
 
         //ScopeParameters events
@@ -283,7 +297,7 @@ namespace test_dso
             try
             {
                 scope.RecordLength = (DSO.Interfaces.IParameter<DSO.Config.RecordLength>)cbxRecLength.SelectedItem;
-                SetCurrentWidowSize(gridCount);
+                SetCurrentWindowSize(gridCount);
             }
             catch (ParametersNotSetException ex)
             {
@@ -297,8 +311,8 @@ namespace test_dso
         }
         private void GetCursorMeasurements()
         {
-            float RightValue = (float)(Math.Round(((double)tbTrigg.Value / 100), 2));
-            float LeftValue = (float)(Math.Round(((double)tbPos.Value / 100), 2));
+            float RightValue = (float)(Math.Round(((double)tbTrigg.Value / 10000), 2));
+            float LeftValue = (float)(Math.Round(((double)tbPos.Value / 10000), 2));
             float DeltaValue = RightValue - LeftValue;
             lblCursorLeftValue.Text = Convert.ToString(LeftValue);
             lblCursorRightValue.Text = Convert.ToString(RightValue);
@@ -306,8 +320,7 @@ namespace test_dso
         }
 
         //Trackbars scrolls
-
-        private void tbTriggScrollEvent(object sender, EventArgs e)//To not duplicate same code in two differnet events (tbTriggScroll and tbTriggValueChanged below)
+        private void tbTrigg_Scroll(object sender, EventArgs e)
         {
             if (CursorMeasurements)
             {
@@ -316,20 +329,12 @@ namespace test_dso
             }
             else
             {
-                curTrig = (float)(0.01 * (tbTrigg.Value - tbPos.Value));
-                lbltrig.Text = Convert.ToString(curTrig + scope.CurrentVoltageLimit.ParameterUnit);
+                curTrig = (float)(0.0001 * (tbTrigg.Value - tbPos.Value));
+                lbltrig.Text = Convert.ToString(curTrig.ToString(("0.000") + scope.CurrentVoltageLimit.ParameterUnit));
                 TriggerLevelChanged = true;
             }
         }
-
-        private void tbTrigg_Scroll(object sender, EventArgs e)
-        {
-            tbTriggScrollEvent(sender, e);
-        }
-        private void tbTrigg_ValueChanged(object sender, EventArgs e)
-        {
-            tbTriggScrollEvent(sender, e);
-        }
+ 
         private void tbTrigg_MouseLeave(object sender, EventArgs e)
         {
 
@@ -397,37 +402,42 @@ namespace test_dso
 
         private void btnGetParam_Click_1(object sender, EventArgs e)
         {
+            tbPos.Value = 0;
+            currVerticalPosition = tbPos.Value;
             DisplayCurrentParameters();
         }
 
         private void btnAutoTrig_Click(object sender, EventArgs e)
         {
+            tbPos.Value = 0;
+            currVerticalPosition = tbPos.Value;
             try
             {
                 scope.TriggerLevel = AutoTrigVal;
-                tbTrigg.Value = Convert.ToInt16(AutoTrigVal * 100);
+                tbTrigg.Value = Convert.ToInt16(AutoTrigVal * 10000);
             }
             catch (DSO.Exceptions.ParametersNotSetException)
             {
-                tbTrigg.Value = Convert.ToInt16(scope.TriggerLevel * 100);
+                tbTrigg.Value = Convert.ToInt16(scope.TriggerLevel * 10000);
             }
-            
+            curTrig = (float)(0.0001 * (tbTrigg.Value - tbPos.Value));
+            lbltrig.Text = Convert.ToString(curTrig.ToString(("0.000") + scope.CurrentVoltageLimit.ParameterUnit));
         }
         private void btnAddCell_Click(object sender, EventArgs e)
         {
             int cellGrid = gridCount;
-            SetCurrentWidowSize(++cellGrid);
+            SetCurrentWindowSize(++cellGrid);
         }
 
         private void btnRemoveCell_Click(object sender, EventArgs e)
         {
             int cellGrid = gridCount;
-            SetCurrentWidowSize(--cellGrid);
+            SetCurrentWindowSize(--cellGrid);
         }
 
         private void btnReset_Click(object sender, EventArgs e)
         {
-            SetCurrentWidowSize(10);
+            SetCurrentWindowSize(10);
             UpdateTrackbarLimits();
             tbVerticalPosition.Value = Convert.ToInt16(tbVerticalPosition.Maximum) / 2;
         }
@@ -448,7 +458,7 @@ namespace test_dso
                 btnCursorFunction.Text = "Measure";
                 CursorMeasurements = false;
                 tbPos.Value = (int)currVerticalPosition;
-                tbTrigg.Value = Convert.ToInt16(100 * curTrig);
+                tbTrigg.Value = Convert.ToInt16(10000 * curTrig);
             }
             if (ScopeCaptureStopped)
             {
@@ -473,7 +483,7 @@ namespace test_dso
                     lblScopeType.Text = scope.ScopeName;
                     PopulateConfig();
                     DisplayCurrentParameters();
-                    SetCurrentWidowSize(10);
+                    SetCurrentWindowSize(10);
                     scope.StartCapture();
                     EnableControls();
                     scope.NewDataInBuffer += Scope_NewDataInBuffer;
@@ -624,7 +634,7 @@ namespace test_dso
             tMenuStopCapture.Enabled = true;
             tMenuSaveAsCSV.Enabled = true;
         }
-        private void SetCurrentWidowSize(int value = 10)
+        private void SetCurrentWindowSize(int value = 10)
         {
             int curRecLength = Convert.ToInt16(((DSO.Interfaces.IParameter<DSO.Config.RecordLength>)cbxRecLength.SelectedItem).ParameterValue);
             int pointPerDiv = scope.DataSamplesPerDiv.GetParameter;
@@ -693,15 +703,15 @@ namespace test_dso
                     foreach (float value in data)
                     {
                             
-                            d1.Points.Add(value + ((float)(0.01 * (currVerticalPosition))));
+                            d1.Points.Add(value + ((float)(0.0001 * (currVerticalPosition))));
                             if (CursorMeasurements)
                             {
-                                l1.Points.Add(((float)(0.01 * (tbPos.Value))));
-                                r1.Points.Add((float)(0.01 * (tbTrigg.Value)));
+                                l1.Points.Add(((float)(0.0001 * (tbPos.Value))));
+                                r1.Points.Add((float)(0.0001 * (tbTrigg.Value)));
                             }
                             else
                             {
-                                t1.Points.Add((float)(0.01 * (tbTrigg.Value)));
+                                t1.Points.Add((float)(0.0001 * (tbTrigg.Value)));
                             }
                     }
                     chrt1.Series.ResumeUpdates();
@@ -799,18 +809,7 @@ namespace test_dso
             curTrig = (float)Math.Round(scope.TriggerLevel, 3);
             curPos = scope.VerticalPosition;
             lbltrig.Text = Convert.ToString(scope.TriggerLevel + scope.CurrentVoltageLimit.ParameterUnit);
-            tbTrigg.Maximum = (int)(Math.Round(100 * scope.CurrentVoltageLimit.GetParameter, 2));
-            tbTrigg.Minimum = (int)(Math.Round(100 * -scope.CurrentVoltageLimit.GetParameter, 2));
-            TrackbarSetValue(tbTrigg, (int)Math.Round(scope.TriggerLevel * 100, 0));
-            try
-            {
-                scope.TriggerLevel = tbTrigg.Value;
-            }
-            catch (DSO.Exceptions.ParametersNotSetException)
-            {
-               //No worries
-            }
-           
+            TrackbarSetValue(tbTrigg, (int)Math.Round(scope.TriggerLevel * 10000, 0));
             cbxReadDelay.SelectedItem = scope.ReadDelay;
 
             foreach (Control cbx in this.groupBox1.Controls)
@@ -823,7 +822,7 @@ namespace test_dso
             }
             cbxCouple.Enabled = !scope.AvailableCoupleSettings.First().IsReadOnly;
             cbxVSens.Enabled = !scope.AvailableSenitivitySettings.First().IsReadOnly;
-            SetCurrentWidowSize(gridCount);
+            SetCurrentWindowSize(gridCount);
         }
 
         private void UpdateTrackbarLimits()
@@ -832,11 +831,11 @@ namespace test_dso
             {
                 BeginInvoke((Action)(() =>
                 {
-                    tbTrigg.Maximum = (int)(Math.Round(100 * scope.CurrentVoltageLimit.GetParameter, 2)); //because trackbar  values are int so need to multiply to get two decimal points after divide / 100
-                    tbTrigg.Minimum = (int)(Math.Round(100 * -scope.CurrentVoltageLimit.GetParameter, 2));
+                    tbTrigg.Maximum = (int)(Math.Round(10000 * scope.CurrentVoltageLimit.GetParameter, 2)); //because trackbar  values are int so need to multiply to get two decimal points after divide / 10000
+                    tbTrigg.Minimum = (int)(Math.Round(10000 * -scope.CurrentVoltageLimit.GetParameter, 2));
 
-                    tbPos.Maximum = (int)(Math.Round(100 * scope.CurrentVoltageLimit.GetParameter, 2));
-                    tbPos.Minimum = (int)(Math.Round(100 * -scope.CurrentVoltageLimit.GetParameter, 2));
+                    tbPos.Maximum = (int)(Math.Round(10000 * scope.CurrentVoltageLimit.GetParameter, 2));
+                    tbPos.Minimum = (int)(Math.Round(10000 * -scope.CurrentVoltageLimit.GetParameter, 2));
 
                     tbVerticalPosition.Maximum = Convert.ToInt16(scope.RecordLength.ParameterValue) - WindowPointsLength;
                     tbVerticalPosition.Minimum = 1;
