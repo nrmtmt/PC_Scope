@@ -17,10 +17,8 @@ namespace test_dso
 {
     public partial class Main : Form
     {
-        static Assembly assembly = Assembly.LoadFrom("DSO.dll");
-        public string version = "1.18.12.01 - GIT";
-        static Version ver = assembly.GetName().Version;
-        public string DLLversion = ver.ToString();
+        public string version = "1.18.12.27 - GIT";
+      
         public static DSO.JyeScope scope;
         public static SerialPort port = null;
         float minTrig = 0;
@@ -65,37 +63,51 @@ namespace test_dso
 
         public Main()
         {
-            InitializeComponent();
-            SerialConfig.Instance.SerialPortCreated += Instance_SerialPortCreated;
-            chrt1.Series.Add(d1);
-            chrt1.Series.Add(t1);
-            chrt1.Series.Add(l1);
-            chrt1.Series.Add(r1);
-            this.chrt1.GetToolTipText += this.chrt1_GetToolTipText;
-            tooltip.AutoPopDelay = 10000;
-            tooltip.InitialDelay = 10000;
-            tooltip.ReshowDelay = 50;
-            // Force the ToolTip text to be displayed whether or not the form is active.
-            tooltip.ShowAlways = true;
-            lblMode.Visible = false;
-            for(int i = 1; i<200; i++)
+            try
             {
-                cbxReadDelay.Items.Add(i); //populate delay combobox
+                InitializeComponent();
+                SerialConfig.Instance.SerialPortCreated += Instance_SerialPortCreated;
+                chrt1.Series.Add(d1);
+                chrt1.Series.Add(t1);
+                chrt1.Series.Add(l1);
+                chrt1.Series.Add(r1);
+                this.chrt1.GetToolTipText += this.chrt1_GetToolTipText;
+                tooltip.AutoPopDelay = 10000;
+                tooltip.InitialDelay = 10000;
+                tooltip.ReshowDelay = 50;
+                // Force the ToolTip text to be displayed whether or not the form is active.
+                tooltip.ShowAlways = true;
+                lblMode.Visible = false;
+                for (int i = 1; i < 200; i++)
+                {
+                    cbxReadDelay.Items.Add(i); //populate delay combobox
+                }
+                DisableControls();
             }
-            DisableControls();
+            catch(Exception ex)
+            {
+                ErrorHandler("Error while loading main window (in Main)", ex);
+            }
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            btnPlay.Text = char.ConvertFromUtf32(0x25B6);
-            btnPause.Text = char.ConvertFromUtf32(0x23F8);
-            gpbCursorMeasure.Visible = false;
-            window = new DebugWindow();
-          
-            foreach (var series in chrt1.Series)
+            try
             {
-                series.IsVisibleInLegend = false;
-                series.ChartType = SeriesChartType.StepLine;
+                btnPlay.Text = char.ConvertFromUtf32(0x25B6);
+                btnPause.Text = char.ConvertFromUtf32(0x23F8);
+                gpbCursorMeasure.Visible = false;
+                window = new DebugWindow();
+
+                foreach (var series in chrt1.Series)
+                {
+                    series.IsVisibleInLegend = false;
+                    series.ChartType = SeriesChartType.StepLine;
+                }
+            }
+            catch(Exception ex)
+            {
+                ErrorHandler("Error while loading main window (in form_load)", ex);
             }
         }
 
@@ -223,6 +235,14 @@ namespace test_dso
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            Assembly assembly = Assembly.LoadFrom("DSO.dll");
+            Version ver = assembly.GetName().Version;
+            var size = IntPtr.Size;  //4 - 32bit 8 - 64bit
+            if(size == 4)
+            {
+                version += " (x86)";
+            }
+            string DLLversion = ver.ToString();
             MessageBox.Show($"PC Scope  v. {version}" + System.Environment.NewLine + $"DSO.dll  v. {DLLversion}" + System.Environment.NewLine + "(C) Kamil Karlowicz 2018", "About", MessageBoxButtons.OK, MessageBoxIcon.Question);
         }
 
