@@ -247,9 +247,9 @@
             this.groupBox4.Controls.Add(this.cbScopeReady);
             this.groupBox4.Controls.Add(this.cbDataBlock);
             this.groupBox4.Controls.Add(this.cbCurrConf);
-            this.groupBox4.Location = new System.Drawing.Point(6, 203);
+            this.groupBox4.Location = new System.Drawing.Point(0, 203);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(491, 89);
+            this.groupBox4.Size = new System.Drawing.Size(497, 89);
             this.groupBox4.TabIndex = 14;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Detected response frame";

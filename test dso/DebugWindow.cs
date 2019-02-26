@@ -179,17 +179,30 @@ namespace test_dso
             }
         }
 
+        private string properHex(string hex)
+        {
+            if (hex.Length < 2 && hex != " ")
+            {
+               return  "0" + hex;
+            }
+            else
+            {
+                return hex;
+            }
+        }
+
+
         private void SetCommandText(DataFrame frame)
         {
             txtEditCommand.Clear();
             var tempText = "";
             foreach (string val in frame.HexData)
             {
-                tempText += val + ", ";
+               tempText += properHex(val)+ " "; 
             }
             if (tempText.Length > 0)
             {
-                txtEditCommand.Text = (tempText.Remove(tempText.Length - 2));
+                txtEditCommand.Text = (tempText.Remove(tempText.Length - 1));
             }
         }
         private void SetParamToComboboxes(CurrParamDataFrame config)
@@ -243,14 +256,15 @@ namespace test_dso
             {
                 if (txtEditCommand.Text != "")
                 {
-                    var bytes = txtEditCommand.Text.Split(',');
+                    var bytes = txtEditCommand.Text.Split(' ');
                     List<byte> proper = new List<byte>();
                     foreach (var value in bytes)
-                    {
-                        proper.Add(byte.Parse(value, System.Globalization.NumberStyles.HexNumber));
+                    {if (value != "")
+                        {
+                            proper.Add(byte.Parse(value, System.Globalization.NumberStyles.HexNumber));
+                        }
                     }
                     port.Write(proper.ToArray(), 0, proper.ToArray().Count());
-
                 }
                 else
                 {
@@ -374,11 +388,11 @@ namespace test_dso
                 }
                 foreach (string val in HexBytes)
                 {
-                    tempText += val + ", ";
+                        tempText += properHex(val) + " ";
                 }
                 if (tempText.Length > 0)
                 {
-                    txtBufferOutput.Text = (tempText.Remove(tempText.Length - 2));
+                    txtBufferOutput.Text = (tempText.Remove(tempText.Length - 1));
                 }
             }
             catch (Exception)
