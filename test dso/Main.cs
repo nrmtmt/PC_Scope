@@ -17,7 +17,7 @@ namespace test_dso
 {
     public partial class Main : Form
     {
-        public string version = "1.18.12.27 - GIT";
+        public string version = "1.18.12.27 - GIT update 19.02.27";
       
         public static DSO.JyeScope scope;
         public static SerialPort port = null;
